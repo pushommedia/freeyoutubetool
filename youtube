@@ -1,0 +1,54 @@
+name: Build PushomTube
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+
+  build-mac:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: pip install customtkinter yt-dlp pyinstaller
+      - name: Build Mac app
+        run: |
+          pyinstaller --onedir --windowed --name "PushomTube" \
+            --hidden-import customtkinter \
+            tubegrab.py
+      - name: Zip Mac app
+        run: cd dist && zip -r PushomTube-Mac.zip PushomTube.app
+      - name: Upload Mac build
+        uses: actions/upload-artifact@v4
+        with:
+          name: PushomTube-Mac
+          path: dist/PushomTube-Mac.zip
+
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: pip install customtkinter yt-dlp pyinstaller
+      - name: Build Windows app
+        run: |
+          pyinstaller --onedir --windowed --name "PushomTube" `
+            --hidden-import customtkinter `
+            tubegrab.py
+      - name: Zip Windows app
+        run: cd dist && Compress-Archive -Path PushomTube -DestinationPath PushomTube-Windows.zip
+      - name: Upload Windows build
+        uses: actions/upload-artifact@v4
+        with:
+          name: PushomTube-Windows
+          path: dist/PushomTube-Windows.zip
